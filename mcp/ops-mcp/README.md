@@ -6,7 +6,7 @@
 
 ```bash
 # 安装
-uv tool install --force tools/ops-mcp
+uv tool install --force mcp/ops-mcp
 
 # 卸载
 uv tool uninstall ops
