@@ -1,0 +1,21 @@
+[project]
+name = "music-search"
+version = "0.1.0"
+description = "音乐搜索/下载 MCP Server — 搜索歌曲、获取下载链接、流式下载到本地"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+dependencies = [
+    "mcp[cli]<2",
+    "httpx",
+]
+
+[project.scripts]
+music-search = "music_search.server:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/music_search"]
