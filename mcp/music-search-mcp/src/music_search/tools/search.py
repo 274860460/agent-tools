@@ -6,6 +6,8 @@ from music_search.config import resolve_cookie, resolve_search_url
 from music_search.http import RequestError, post_json
 
 _MAX_RESULT_CHARS = 12000
+_MAX_PAGE = 10
+_MAX_SIZE = 50
 
 _HINT = (
     "提示：选中歌曲后，把该项的 id/time/sign 原样传给 get_download_url "
@@ -34,8 +36,8 @@ def register(mcp):
         Args:
             keyword: 搜索关键词（必填），如歌名或「歌名 歌手」
             platform: 平台，默认 kuwo
-            page: 页码，默认 1
-            size: 每页条数，默认 20
+            page: 页码，默认 1，上限 10（防止翻页过深）
+            size: 每页条数，默认 20，上限 50（防止结果过大）
             url: 搜索接口地址，缺省读环境变量 SEARCH_URL
             cookie: 会话 cookie，缺省读环境变量 SEARCH_COOKIE
         """
@@ -43,6 +45,12 @@ def register(mcp):
         if not target:
             return "[未配置] 缺少搜索接口地址：请传 url 参数，或配置环境变量 SEARCH_URL"
         cookie_value = resolve_cookie(cookie)
+
+        clamped = ""
+        if page > _MAX_PAGE or size > _MAX_SIZE:
+            clamped = f"（page/size 已钳制到上限 {_MAX_PAGE}/{_MAX_SIZE}）"
+        page = max(1, min(page, _MAX_PAGE))
+        size = max(1, min(size, _MAX_SIZE))
 
         try:
             payload = post_json(
@@ -76,12 +84,12 @@ def register(mcp):
         ]
         total = data.get("total", 0)
         output = json.dumps({"total": total, "list": results},
-                            ensure_ascii=False, indent=2)
+                            ensure_ascii=False, separators=(",", ":"))
         if len(output) > _MAX_RESULT_CHARS:
             # 截断保护：整条丢弃末尾记录，避免把某条的 time/sign 切残
             while results and len(output) > _MAX_RESULT_CHARS:
                 results.pop()
                 output = json.dumps({"total": total, "list": results},
-                                    ensure_ascii=False, indent=2)
-            output += f"\n... [已截断，仅展示前 {len(results)} 条]"
-        return output + "\n\n" + _HINT
+                                    ensure_ascii=False, separators=(",", ":"))
+            output += f"... [已截断，仅展示前 {len(results)} 条] "
+        return output + clamped + "\n\n" + _HINT

@@ -6,7 +6,7 @@
 
 ```bash
 # 安装
-uv tool install --force mcp/music-search-mcp
+uv tool install --force --no-cache mcp/music-search-mcp
 
 # 卸载
 uv tool uninstall music-search
@@ -35,8 +35,8 @@ music-search serve    # 启动 MCP Server（由 AI 客户端自动调用）
 |------|------|------|------|
 | keyword | ✅ | — | 搜索关键词，如歌名或「歌名 歌手」 |
 | platform | | kuwo | 平台 |
-| page | | 1 | 页码 |
-| size | | 20 | 每页条数 |
+| page | | 1 | 页码，上限 10（防翻页过深） |
+| size | | 20 | 每页条数，上限 50（超出自动钳制） |
 | url | | 环境变量 SEARCH_URL | 搜索接口地址 |
 | cookie | | 环境变量 SEARCH_COOKIE | 会话 cookie |
 
